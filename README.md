@@ -53,3 +53,11 @@ Convert logging data and find wildfires within logging zones
 
 ```
 
+CA shapefile  and changing the CRS to  NAD83
+```{r}
+
+n_Cali = st_read("C:/Users/candl/OneDrive/Desktop/esp prject/ca_state/CA_State.shp")
+Cali=  st_transform(Cali,4269)
+st_crs(Cali)
+
+```
