@@ -49,6 +49,21 @@ logging_sf = st_as_sf(logging, coords = c("Longitude", "Latitude"), crs = 4326, 
 Convert logging data and find wildfires within logging zones 
 
 ```{r}
+library(dplyr)
+
+ca_forests = c("Shasta-Trinity National Forest", "Sierra National Forest", "Los Padres National Forest", "Klamath National Forest", "Sequoia National Forest", "Six Rivers National Forest", "Mendocino National Forest", "Stanislaus National Forest", "Angeles National Forest", "Cleveland National Forest", "Eldorado National Forest", " Inyo National Forest", "Klamath National Forest", "Lassen National Forest", "Modoc National Forest", "Plumas National Forest","Rogue River-Siskiyou National Forest", "San Bernardino National Forest", "Tahoe National Forest")
+
+
+logging_ca = logging %>%
+  filter(ADMIN_FO_1 %in% ca_forests)
+logging_ca = logging_ca %>% 
+  filter(!st_is_empty(geometry))
+
+logging_ca = st_transform(logging, crs = st_crs(wildfire_sf))
+logging_ca = st_make_valid(logging_ca)
+
+#Warning (need to fix)
+fire_logging_zones = st_intersection(wildfire_sf, logging_ca)
 
 
 ```
