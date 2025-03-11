@@ -76,3 +76,13 @@ Cali=  st_transform(Cali,4269)
 st_crs(Cali)
 
 ```
+
+barplot dataframe
+
+```{r}
+```
+
+ggplot (bar plot) 
+```{r}
+
+```
