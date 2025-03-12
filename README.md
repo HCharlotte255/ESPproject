@@ -39,19 +39,19 @@ wildfire_summ = ca_wildfire %>%
   summarise(Total_AcresBurned = sum(AcresBurned, na.rm = TRUE), .groups = "drop")
 
 ```
-Convert wildfire and logging data using "sf" package to get latitude and longitude. (the package is tool for spatial vector data (points, lines, polygons, etc.)) 
+Convert wildfire data using "sf" package to get latitude and longitude. (the package is tool for spatial vector data (points, lines, polygons, etc.)) 
 
 ```{r}
-wildfire_sf = st_as_sf(ca_wildfire, coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE)
-logging_sf = st_as_sf(logging, coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE)
+wildfire_sf <- wildfire_sf %>%
+  filter(st_coordinates(.)[,2] >= 32 & st_coordinates(.)[,2] <= 42, st_coordinates(.)[,1] >= -124 & st_coordinates(.)[,1] <= -114)
 
 ```
-Convert logging data and find wildfires within logging zones 
+Convert logging data and find wildfires within and near logging zones
 
 ```{r}
 library(dplyr)
 
-ca_forests = c("Shasta-Trinity National Forest", "Sierra National Forest", "Los Padres National Forest", "Klamath National Forest", "Sequoia National Forest", "Six Rivers National Forest", "Mendocino National Forest", "Stanislaus National Forest", "Angeles National Forest", "Cleveland National Forest", "Eldorado National Forest", " Inyo National Forest", "Klamath National Forest", "Lassen National Forest", "Modoc National Forest", "Plumas National Forest","Rogue River-Siskiyou National Forest", "San Bernardino National Forest", "Tahoe National Forest")
+ca_forests = c("Shasta-Trinity National Forest", "Sierra National Forest", "Los Padres National Forest", "Klamath National Forest", "Sequoia National Forest", "Six Rivers National Forest", "Mendocino National Forest", "Stanislaus National Forest", "Angeles National Forest", "Cleveland National Forest", "Eldorado National Forest", "Inyo National Forest", "Klamath National Forest", "Lassen National Forest", "Modoc National Forest", "Plumas National Forest","Rogue River-Siskiyou National Forest", "San Bernardino National Forest", "Tahoe National Forest")
 
 
 logging_ca = logging %>%
@@ -59,30 +59,43 @@ logging_ca = logging %>%
 logging_ca = logging_ca %>% 
   filter(!st_is_empty(geometry))
 
-logging_ca = st_transform(logging, crs = st_crs(wildfire_sf))
-logging_ca = st_make_valid(logging_ca)
+logging_ca =  st_transform(logging_ca, crs = 4326)
+```
 
-#Warning (need to fix)
-fire_logging_zones = st_intersection(wildfire_sf, logging_ca)
+CA shape file and changing the CRS to 4326
+```{r}
+n_cali = st_read("/Users/tarilyntong/Desktop/ESP 106/Final Project/ca_state/CA_State.shp")
+n_cali =  st_transform(n_cali, crs = 4326)
+st_crs(n_cali) ==st_crs(wildfire_sf)
+```
+Plot the CA outline and wildfire and logging data
+```{r}
+library(ggplot2)
+library(sf)
+library(dplyr)
+
+ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+ geom_sf(data = wildfire_sf, color ="red", alpha = 0.4, size = 0.5) + geom_sf(data = logging_ca, color = "blue", alpha = 0.4, size = 0.5) + theme_minimal()+ labs(title = "Wildfire and Logging Activity in California")
+
 
 
 ```
 
-CA shapefile  and changing the CRS to  NAD83
+Create a bar plot data frame
 ```{r}
 
-n_Cali = st_read("C:/Users/candl/OneDrive/Desktop/esp prject/ca_state/CA_State.shp")
-Cali=  st_transform(Cali,4269)
-st_crs(Cali)
-
 ```
 
-barplot dataframe
-
-```{r}
-```
-
-ggplot (bar plot) 
+ggplot (bar plot)
 ```{r}
 
+
+
 ```
+
+
+
+
+
+
+
+
