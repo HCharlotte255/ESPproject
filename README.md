@@ -222,7 +222,9 @@ fires_with_logging <- st_join(fires_sf, logging_ca, join = st_intersects)
 fire_summary <- fires_with_logging %>%
   group_by(ADMIN_FO_1) %>%
   summarise(total_fire_size = sum(AcresBurned, na.rm = TRUE)) %>%
-  arrange(desc(total_fire_size))
+  filter(!is.na(ADMIN_FO_1))%>%
+  arrange(desc(total_fire_size))%>%
+  filter(!is.na(total_fire_size))
 
 # Create a bar plot showing the total fire size in each logging area
 ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fire_size)) +
@@ -234,7 +236,6 @@ ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fi
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 
 
-```
 ```
 
 
