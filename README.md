@@ -185,10 +185,45 @@ ggplot(fire_summ, aes(x = AdminUnit, y = AcresBurn)) +
        y = "Fire Size (Acres)") 
 ```
 
-ggplot (bar plot)
+HELP ME RUN THIS CODE PLS (this is a fixed code from chatgpt) i wanna know what it looks like 
 ```{r}
 
+library(tidyr)
+library(dplyr)
+library(sf)
+library(terra)
+library(lubridate)
+library(ggplot2)
 
+
+logging_sf <- st_read("c:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")  # Replace with actual file path
+
+
+fires_df <- read.csv("c:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")  # Replace with actual file path
+print(fires_df)
+
+fires_sf <- st_as_sf(fires_df, coords = c("longitude", "latitude"), crs = 4326) 
+
+
+fires_sf <- st_transform(fires_sf, st_crs(logging_sf))
+
+
+fires_with_logging <- st_join(fires_sf, logging_sf, join = st_intersects)
+
+
+fire_summary <- fires_with_logging %>%
+  group_by(logging_site) %>%  
+  summarise(total_fire_size = sum(fire_size, na.rm = TRUE)) %>%
+  arrange(desc(total_fire_size))  
+
+
+ggplot(fire_summary, aes(x = reorder(logging_site, -total_fire_size), y = total_fire_size)) +
+  geom_bar(stat = "identity", fill = "red") +
+  theme_minimal() +
+  labs(title = "Total Fire Size in Different ",
+       x = "Logging Area",
+       y = "Total Fire Size (Acres)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
