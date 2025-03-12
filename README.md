@@ -185,7 +185,7 @@ ggplot(fire_summ, aes(x = AdminUnit, y = AcresBurn)) +
        y = "Fire Size (Acres)") 
 ```
 
-HELP ME RUN THIS CODE PLS (this is a fixed code from chatgpt) i wanna know what it looks like 
+FIXED CODE 
 ```{r}
 
 library(tidyr)
@@ -194,37 +194,47 @@ library(sf)
 library(terra)
 library(lubridate)
 library(ggplot2)
+library(stars)
 
 
 logging_sf <- st_read("c:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")  # Replace with actual file path
 
 
-fires_df <- read.csv("c:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")  # Replace with actual file path
-print(fires_df)
+# Assuming 'fire_crs' contains your transformed fire data
+fires_df <- fire_crs  
 
-fires_sf <- st_as_sf(fires_df, coords = c("longitude", "latitude"), crs = 4326) 
+# Convert fire data to SF object
+fires_sf <- st_as_sf(fires_df, coords = c("Longitude", "Latitude"), crs = 4326)
 
-
+# Transform the CRS of fire data to match the logging data's CRS
 fires_sf <- st_transform(fires_sf, st_crs(logging_sf))
 
+# Disable s2 geometry library 
+sf_use_s2(FALSE)
 
-fires_with_logging <- st_join(fires_sf, logging_sf, join = st_intersects)
+# Align bounding boxes of fire data and logging data
+st_bbox(fires_sf) <- st_bbox(logging_ca)
 
+# Perform spatial join between fire data and logging data (finding where fires intersect logging areas)
+fires_with_logging <- st_join(fires_sf, logging_ca, join = st_intersects)
 
+# Summarize total fire size for each logging area
 fire_summary <- fires_with_logging %>%
-  group_by(logging_site) %>%  
-  summarise(total_fire_size = sum(fire_size, na.rm = TRUE)) %>%
-  arrange(desc(total_fire_size))  
+  group_by(ADMIN_FO_1) %>%
+  summarise(total_fire_size = sum(AcresBurned, na.rm = TRUE)) %>%
+  arrange(desc(total_fire_size))
 
-
-ggplot(fire_summary, aes(x = reorder(logging_site, -total_fire_size), y = total_fire_size)) +
+# Create a bar plot showing the total fire size in each logging area
+ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fire_size)) +
   geom_bar(stat = "identity", fill = "red") +
   theme_minimal() +
-  labs(title = "Total Fire Size in Different ",
+  labs(title = "Total Acres Burned in Different Logging Areas",
        x = "Logging Area",
-       y = "Total Fire Size (Acres)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+       y = "Total Acres Burned (Acres)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 
+
+```
 ```
 
 
