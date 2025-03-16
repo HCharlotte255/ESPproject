@@ -238,6 +238,80 @@ ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fi
 
 ```
 
+3/16, 4:33, bar graph and data summary 
+
+
+```{r}
+logging_sf <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")
+fire_crs <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
+
+fires_df <- fire_crs  
+
+#convert fire data  to spatial object
+fires_sf <- st_as_sf(fires_df, coords = c("Longitude", "Latitude"), crs = 4326)
+
+# Transform the CRS of fire data to match the logging data's CRS
+fires_sf <- st_transform(fires_sf, st_crs(logging_sf))
+
+# Disable s2 geometry library 
+sf_use_s2(FALSE)
+
+#Filter Logging Areas in National Forests
+loggingca = logging_sf %>%
+  filter(grepl("National Forest", ADMIN_FORE, ignore.case = TRUE))
+
+#Remove Empty Geometries
+logging_ca = logging_sf[!st_is_empty(logging_sf), ]
+
+#Find Fire Incidents Inside Logging Areas
+fire_logging_zones = st_intersection(fires_sf, logging_ca)
+
+-------------
+TROUBLE SHOOT IF NEEDED
+#Align Fire and Logging Data’s Bounding Boxes (Fix Display Issues)
+st_bbox(fires_sf) <- st_bbox(logging_ca)
+
+#Reproject Data to a UTM Coordinate System
+projected_crs <- 32610  
+logging_sf_proj <- st_transform(logging_sf, crs = projected_crs)
+fire_sf_proj <- st_transform(fire_sf, crs = projected_crs)
+fires_in_logging <- st_intersection(fire_sf_proj, logging_sf_proj)
+------
+
+Summarize Fires by National Forest Office (ADMIN_FO_1)
+fires_FO  <- fire_logging_zones%>%
+  filter(!is.na(ADMIN_FO_1)) %>%
+  group_by(ADMIN_FO_1) %>%      
+  summarize(AcresBurned = sum(AcresBurned, na.rm = TRUE))
+
+
+#Sort Logging Areas by Total Fire Size
+fire_summary <- fire_logging_zones %>%
+  group_by(ADMIN_FO_1) %>%
+  summarise(total_fire_size = sum(AcresBurned, na.rm = TRUE)) %>%
+  filter(!is.na(ADMIN_FO_1)) %>%
+  arrange(desc(total_fire_size)) %>%
+  filter(!is.na(total_fire_size))
+
+
+#plots
+ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fire_size)) +
+  geom_bar(stat = "identity", fill = "red") +
+  theme_minimal() +
+  labs(title = "Total Acres Burned in Different Logging Areas",
+       x = "Logging Area",
+       y = "Total Acres Burned (Acres)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+ggplot() +
+  geom_sf(data = fire_summary, fill = NA, color = "black") +
+  geom_sf(data = fire_summary, aes(color = total_fire_size), alpha = 0.5) +  
+  scale_color_gradient(low = "yellow", high = "red") +
+  labs(title = "Wildfire Incidents in Logging Areas",
+       color = "Acres Burned")
+
+````
 
 
 
