@@ -102,7 +102,11 @@ overlap_sf <- st_intersection(wildfire_polygons, logging_ca)
 
 Create plots with overlap between both data sets
 ```{r}
-ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5) + geom_sf(data = wildfire_polygons, fill = "red", color = "red", alpha = 0.5) + geom_sf(data = logging_ca, fill = "blue", color = "blue",alpha = 0.7) + geom_sf(data = overlap_sf, fill = "yellow", color = "yellow", alpha = 1) + theme_minimal() + labs(title = "Wildfire and Logging Activity Overlap in California (2019)")
+ggplot() + 
+  geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5) + 
+  geom_sf(data = wildfire_polygons, aes(fill = "Wildfire"), color = "red", alpha = 0.5) + geom_sf(data = logging_ca, aes(fill = "Logging"), color = "blue", alpha = 0.7) + 
+  geom_sf(data = overlap_sf, aes(fill = "Overlap"), color = "yellow", alpha = 1) + 
+  scale_fill_manual(values = c("Wildfire" = "red", "Logging" = "blue", "Overlap" = "yellow")) + theme_minimal() + labs(title = "Wildfire and Logging Activity Overlap in California (2019)", fill = "Activity Type") + theme(legend.position = "right") 
 ```
 Create a bar plot data frame
 ```{r}
