@@ -43,10 +43,14 @@ wildfire_summ = ca_wildfire %>%
 Convert wildfire data using "sf" package to get latitude and longitude. (the package is tool for spatial vector data (points, lines, polygons, etc.)) 
 
 ```{r}
-wildfire_sf <- wildfire_sf %>%
-  filter(st_coordinates(.)[,2] >= 32 & st_coordinates(.)[,2] <= 42, st_coordinates(.)[,1] >= -124 & st_coordinates(.)[,1] <= -114)
-wildfire_sf <- wildfire_sf %>% 
-  filter(ArchiveYear == 2019)
+wildfire_polygons <- wildfire_sf %>%
+  filter(ArchiveYear == 2019) %>%
+  st_buffer(dist = 5000)
+
+if (st_crs(wildfire_polygons)$units != "m") {
+  wildfire_polygons <- st_transform(wildfire_polygons, crs = 32610)
+}
+
 ```
 Convert logging data and find wildfires within and near logging zones
 
@@ -79,8 +83,8 @@ library(ggplot2)
 library(sf)
 library(dplyr)
 
-ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+ geom_sf(data = wildfire_sf, color ="red", alpha = 0.4, size = 0.5)+ theme_minimal()+ labs(title = "Wildfire Incidents in California (2019) ")
-  
+ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+ geom_sf(data = wildfire_polygons, fill = "red", color = "red", alpha = 0.5) + theme_minimal() + labs(title = "Wildfire Incidents in California (2019)")
+
 ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+geom_sf(data = logging_ca, color = "blue", alpha = 0.4, size = 0.5) + theme_minimal()+ labs(title = "Logging Activity in California National Forests (2019)")
 ```
 
