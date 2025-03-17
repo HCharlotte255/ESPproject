@@ -88,6 +88,22 @@ ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0
 ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+geom_sf(data = logging_ca, color = "blue", alpha = 0.4, size = 0.5) + theme_minimal()+ labs(title = "Logging Activity in California National Forests (2019)")
 ```
 
+Find Overlap between Wildfire and Logging Data 
+```{r}
+# Fix invalid geometries in both wildfire and logging data
+wildfire_polygons <- wildfire_polygons %>%
+  st_make_valid()
+
+logging_ca <- logging_ca %>%
+  st_make_valid()
+
+overlap_sf <- st_intersection(wildfire_polygons, logging_ca)
+```
+
+Create plots with overlap between both data sets
+```{r}
+ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5) + geom_sf(data = wildfire_polygons, fill = "red", color = "red", alpha = 0.5) + geom_sf(data = logging_ca, fill = "blue", color = "blue",alpha = 0.7) + geom_sf(data = overlap_sf, fill = "yellow", color = "yellow", alpha = 1) + theme_minimal() + labs(title = "Wildfire and Logging Activity Overlap in California (2019)")
+```
 Create a bar plot data frame
 ```{r}
 wildfire_sf = st_as_sf(ca_wildfire, coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE)
