@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## ESP 106 Wildfire Project Presentation
 
-In this project, we plan to cover the extent of wildfires within California and its connection to tree logging activity.
+In this project, we plan to cover the extent of wildfires within California and their connection to tree-logging activity.
 
 Wildfire Variables:
 AcresBurned
@@ -23,7 +23,8 @@ Counties
 CountyIDs
 Latitude
 Longitude
-Name- name of the fire
+Name- Name of the fire
+
 
 Reading in CSV and then prepare data for analysis ("data wrangling")
 ```{r Wildfire Data}
@@ -37,14 +38,15 @@ logging = st_read("/Users/tarilyntong/Desktop/ESP 106/Final Project/Actv_TimberH
 wildfire_summ = ca_wildfire %>%
   group_by(Counties, ArchiveYear) %>%
   summarise(Total_AcresBurned = sum(AcresBurned, na.rm = TRUE), .groups = "drop")
-
 ```
+
 Convert wildfire data using "sf" package to get latitude and longitude. (the package is tool for spatial vector data (points, lines, polygons, etc.)) 
 
 ```{r}
 wildfire_sf <- wildfire_sf %>%
   filter(st_coordinates(.)[,2] >= 32 & st_coordinates(.)[,2] <= 42, st_coordinates(.)[,1] >= -124 & st_coordinates(.)[,1] <= -114)
-
+wildfire_sf <- wildfire_sf %>% 
+  filter(ArchiveYear == 2019)
 ```
 Convert logging data and find wildfires within and near logging zones
 
@@ -58,6 +60,9 @@ logging_ca = logging %>%
   filter(ADMIN_FO_1 %in% ca_forests)
 logging_ca = logging_ca %>% 
   filter(!st_is_empty(geometry))
+logging_ca <- logging %>%
+  filter(ADMIN_FO_1 %in% ca_forests) %>%
+  filter(FY_COMPLET == 2019)
 
 logging_ca =  st_transform(logging_ca, crs = 4326)
 ```
@@ -74,10 +79,9 @@ library(ggplot2)
 library(sf)
 library(dplyr)
 
-ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+ geom_sf(data = wildfire_sf, color ="red", alpha = 0.4, size = 0.5) + geom_sf(data = logging_ca, color = "blue", alpha = 0.4, size = 0.5) + theme_minimal()+ labs(title = "Wildfire and Logging Activity in California")
-
-
-
+ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+ geom_sf(data = wildfire_sf, color ="red", alpha = 0.4, size = 0.5)+ theme_minimal()+ labs(title = "Wildfire Incidents in California (2019) ")
+  
+ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+geom_sf(data = logging_ca, color = "blue", alpha = 0.4, size = 0.5) + theme_minimal()+ labs(title = "Logging Activity in California National Forests (2019)")
 ```
 
 Create a bar plot data frame
