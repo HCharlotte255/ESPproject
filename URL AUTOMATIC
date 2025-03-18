@@ -19,9 +19,32 @@ ca_unzip_dir <- "CA_State.shp"
 
 ca_shp_file <- list.files(ca_unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
 
-kaggle_zip_url <- ""
-kaggle_zip_file<-"archive (2).zip
-logging_unzip_dir<- "California_Fire_Incidents.csv"
+
+
+
+#kaggle 
+
+install.packages("httr")
+library(httr)
+
+# Define the download URL
+url <- "https://www.kaggle.com/api/v1/datasets/download/ananthu017/california-wildfire-incidents-20132020?datasetVersionNumber=1"
+
+# Set the destination file
+destfile <- "wildfire_data.zip"
+
+# Perform the download
+GET(url, write_disk(destfile, overwrite = TRUE))
+
+# Unzip the file
+unzip(destfile, exdir = "wildfire_data")
+
+# List the files in the extracted folder
+list.files("wildfire_data")
+
+
+
+
 
 ```
 
