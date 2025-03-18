@@ -41,7 +41,6 @@ wildfire_summ = ca_wildfire %>%
 ```
 
 Convert wildfire data using "sf" package to get latitude and longitude. (the package is tool for spatial vector data (points, lines, polygons, etc.)) 
-
 ```{r}
 wildfire_polygons <- wildfire_sf %>%
   filter(ArchiveYear == 2019) %>%
@@ -53,7 +52,6 @@ if (st_crs(wildfire_polygons)$units != "m") {
 
 ```
 Convert logging data and find wildfires within and near logging zones
-
 ```{r}
 library(dplyr)
 
@@ -70,7 +68,6 @@ logging_ca <- logging %>%
 
 logging_ca =  st_transform(logging_ca, crs = 4326)
 ```
-
 CA shape file and changing the CRS to 4326
 ```{r}
 n_cali = st_read("/Users/tarilyntong/Desktop/ESP 106/Final Project/ca_state/CA_State.shp")
@@ -88,6 +85,20 @@ ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0
 ggplot() + geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5)+geom_sf(data = logging_ca, color = "blue", alpha = 0.4, size = 0.5) + theme_minimal()+ labs(title = "Logging Activity in California National Forests (2019)")
 ```
 
+Create a bar plot showing the number of logging activities against the different national forests.
+```{r}
+logging_summ <- logging_ca %>%
+  st_drop_geometry() %>%
+  count(ADMIN_FO_1, name = "n")
+
+ggplot(logging_summ, aes(x = reorder(ADMIN_FO_1, n), y = n, fill = ADMIN_FO_1)) + 
+  geom_col(show.legend = FALSE) + 
+  theme_minimal() + 
+  labs(title = "Logging Activity in California National Forests (2019)", 
+       x = "National Forest", 
+       y = "Number of Logging Activities") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 Find Overlap between Wildfire and Logging Data 
 ```{r}
 # Fix invalid geometries in both wildfire and logging data
@@ -99,8 +110,7 @@ logging_ca <- logging_ca %>%
 
 overlap_sf <- st_intersection(wildfire_polygons, logging_ca)
 ```
-
-Create plots with overlap between both data sets
+Create a map with overlap between both data sets
 ```{r}
 ggplot() + 
   geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5) + 
@@ -212,8 +222,7 @@ ggplot(fire_summ, aes(x = AdminUnit, y = AcresBurn)) +
        x = "Logging Area",
        y = "Fire Size (Acres)") 
 ```
-
-FIXED CODE 
+Create bar plot showing the number of acres burned against different logging areas
 ```{r}
 
 library(tidyr)
@@ -294,19 +303,8 @@ logging_ca = logging_sf[!st_is_empty(logging_sf), ]
 #Find Fire Incidents Inside Logging Areas
 fire_logging_zones = st_intersection(fires_sf, logging_ca)
 
--------------
-TROUBLE SHOOT IF NEEDED
-#Align Fire and Logging Data’s Bounding Boxes (Fix Display Issues)
-st_bbox(fires_sf) <- st_bbox(logging_ca)
 
-#Reproject Data to a UTM Coordinate System
-projected_crs <- 32610  
-logging_sf_proj <- st_transform(logging_sf, crs = projected_crs)
-fire_sf_proj <- st_transform(fire_sf, crs = projected_crs)
-fires_in_logging <- st_intersection(fire_sf_proj, logging_sf_proj)
-------
-
-Summarize Fires by National Forest Office (ADMIN_FO_1)
+#Summarize Fires by National Forest Office (ADMIN_FO_1)
 fires_FO  <- fire_logging_zones%>%
   filter(!is.na(ADMIN_FO_1)) %>%
   group_by(ADMIN_FO_1) %>%      
@@ -341,39 +339,7 @@ ggplot() +
 
 ````
 
-hopefully working ntersection.
 
-```{r}
-library(tidyr)
-library(dplyr)
-library(sf)
-library(terra)
-library(lubridate)
-library(ggplot2)
-library(stars)
-
-
-logging_sf <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")  # Replace with actual file path
-fire_crs <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
-ca <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/ca_state/CA_State.shp")
-
-
-fire_sf <- st_as_sf(fire_crs, coords = c("Longitude", "Latitude"), crs = 4326)
-
-logging_sf <- st_transform(logging_sf, st_crs(ca))
-fire_sf <- st_transform(fire_crs, st_crs(ca))
-
-
-fire_sf <- st_transform(fire_sf, st_crs(logging_sf))
-
-fire_logging_overlap <- st_join(fire_sf, logging_sf, left = FALSE, join = st_intersects)
-
-fire_loca  <- fire_logging_overlap%>%
-  filter(!is.na(ADMIN_FO_1)) %>%
-  group_by(ADMIN_FO_1) %>%      
-  summarize(AcresBurned = sum(AcresBurned, na.rm = TRUE))
-
-```
 
 
 
