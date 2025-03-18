@@ -158,6 +158,8 @@ n_cali<- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/ca_state/CA_State.s
 
 fire_sf <- st_as_sf(ca_wildfire, coords = c("Longitude", "Latitude"), crs = 4326)
 
+st_crs(fire_sf) <- 4326
+
 fire_sf <- st_transform(fire_sf, st_crs(n_cali))
 fire_sf <- st_transform(fire_sf, st_crs(logging))
 logging_sf <- st_transform(logging, st_crs(n_cali))
