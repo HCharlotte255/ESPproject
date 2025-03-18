@@ -348,7 +348,7 @@ ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fi
 
 ```
 
-fixed smooth bar grapgh
+fixed smooth bar grapgh 
 
 
 ```{r}
