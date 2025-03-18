@@ -1,0 +1,11 @@
+ Set the file name and URL
+dataset_url <- "https://example.com/dataset.csv"  # Replace with actual URL
+dataset_path <- "dataset.csv"
+
+# Check if the dataset exists, if not, download it
+if (!file.exists(dataset_path)) {
+  download.file(dataset_url, dataset_path, mode = "wb")
+}
+
+# Load the dataset
+data <- read.csv(dataset_path)
