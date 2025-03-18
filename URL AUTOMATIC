@@ -19,6 +19,10 @@ ca_unzip_dir <- "CA_State.shp"
 
 ca_shp_file <- list.files(ca_unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
 
+kaggle_zip_url <- ""
+kaggle_zip_file<-"archive (2).zip
+logging_unzip_dir<- "California_Fire_Incidents.csv"
+
 ```
 
 
