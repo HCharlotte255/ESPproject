@@ -244,6 +244,10 @@ The bar graph visually represents the extent of wildfire damage by showing the t
 fire_sf <- st_as_sf(ca_wildfire, coords = c("Longitude", "Latitude"), crs = 4326)
 logging_sf <- st_transform(logging, st_crs(n_cali))
 
+fire_sf <- st_make_valid(fire_sf)
+logging_sf <- st_make_valid(logging_sf)
+
+
 #Create another overlap between fire and logging  
 fire_logging_overlap <- st_join(fire_sf, logging_sf, left = FALSE, join = st_intersects)
 
