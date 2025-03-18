@@ -189,27 +189,53 @@ Mapping logging regions and wildfire incidents provides a clear way to identify 
 
 ## Summarize Fire Incidents in Logging Areas
 ```{r}
-wildfire_sf <- st_transform(wildfire_sf, crs = 4326)
-logging_ca <- st_transform(logging_ca, crs = 4326)
-wildfire_sf <- wildfire_sf[!(st_coordinates(wildfire_sf)[, 2] > 90 | st_coordinates(wildfire_sf)[, 2] < -90), ]
-wildfire_sf <- st_make_valid(wildfire_sf)
+fire_df <- ca_wildfire
+
+fires_sf<-st_as_sf(fire_df,coords = c("Longitude", "Latitude"), crs = 4326)
 
 
-fires_with_logging <- st_join(wildfire_sf, logging_ca, join = st_intersects)
+fires_sf <- st_transform(fires_sf, st_crs(logging))
 
-fire_summary <- fires_with_logging %>%
+sf_use_s2(FALSE)
+------------------------
+loggingca = logging %>%
+  filter(grepl("National Forest", ADMIN_FORE, ignore.case = TRUE))
+
+logging_ca = logging[!st_is_empty(logging), ]
+
+fire_logging_zones = st_intersection(fires_sf, logging_ca)
+
+projected_crs <- 32610  
+logging_sf_proj <- st_transform(logging, crs = projected_crs)
+fire_sf_proj <- st_transform(fires_sf, crs = projected_crs)
+fires_in_logging <- st_intersection(fire_sf_proj, logging_sf_proj)
+
+
+fires_in_logging  <- fires_in_logging%>%
+  filter(!is.na(AdminUnit,)) %>%
+  group_by(AdminUnit) %>%      
+  summarize(AcresBurned = sum(AcresBurned, na.rm = TRUE))
+
+
+
+fire_summary <- fire_logging_zones %>%
   group_by(ADMIN_FO_1) %>%
   summarise(total_fire_size = sum(AcresBurned, na.rm = TRUE)) %>%
-  filter(!is.na(ADMIN_FO_1)) %>%
-  arrange(desc(total_fire_size))
+  filter(!is.na(ADMIN_FO_1))%>%
+  arrange(desc(total_fire_size))%>%
+  filter(!is.na(total_fire_size))
 
-ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fire_size)) +
+
+
+
+barplot<- ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fire_size)) +
   geom_bar(stat = "identity", fill = "red") +
   theme_minimal() +
   labs(title = "Total Acres Burned in Different Logging Areas",
        x = "Logging Area",
        y = "Total Acres Burned (Acres)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
 ```
 The bar graph visually represents the extent of wildfire damage by showing the total number of acres burned in different logged areas. The data is arranged in descending order to make patterns easier to identify. The vertical (y-axis) represents the total acres burned, while the horizontal (x-axis) represents the logged areas within California’s national forests. From this, we can clearly see that some regions were affected more than others. Notably, Plumas National Forest experienced the highest number of acres burned in logged areas, whereas Modoc National Forest had the lowest. This plot highlights how wildfire severity varies across different regions, even among forests in close proximity within Northern California.
 
