@@ -164,7 +164,7 @@ logging_ca <- st_make_valid(logging_ca)
 
 
 
-overlap_sf <- st_join(fire_sf_clean, logging_sf_clean, left = FALSE, join = st_intersects)
+overlap_sf <- st_intersection(wildfire_polygons, logging_ca)
 ```
 
 ## Plot Overlap Between Wildfire and Logging
