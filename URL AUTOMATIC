@@ -3,13 +3,22 @@
 library(sf)
 library(utils)
 
-
+#logging harvest automatic download 
 logging_zip_url <- https://data.fs.usda.gov/geodata/edw/edw_resources/shp/Actv_TimberHarvest.zip
 logging_zip_file<-"Actv_TimberHarvest.zip"
 logging_unzip_dir<- "S_USA.Actv_TimberHarvest.shp"
 
 
 logging_shp_file <- list.files(unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
+
+
+#ca state 
+ca_zip_url <- "https://data.ca.gov/dataset/e212e397-1277-4df3-8c22-40721b095f33/resource/3db1e426-fb51-44f5-82d5-a54d7c6e188b/download/ca_state.zip"
+ca_zip_file <- "ca_state (1).zip
+ca_unzip_dir <- "CA_State.shp"
+
+ca_shp_file <- list.files(ca_unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
+
 ```
 
 
