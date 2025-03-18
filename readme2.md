@@ -3,8 +3,52 @@ title: "ESP Wildfire Project"
 author: "Tarilyn Tong and Charlotte He"
 date: "2025-03-17"
 output:
+  html_document:
+    df_print: paged
   pdf_document: default
 ---
+```{r}
+install.packages("httr", repos = "https://cran.rstudio.com")
+library(sf)
+library(utils)
+library(httr)
+
+logging_zip_url <- "https://data.fs.usda.gov/geodata/edw/edw_resources/shp/Actv_TimberHarvest.zip"
+
+# Specify the location to save the zip file
+logging_zip_file <- "Actv_TimberHarvest.zip"
+logging_unzip_dir <- "S_USA_Actv_TimberHarvest"
+
+# Download the zip file if it doesn't already exist and unzip it
+if (!file.exists(logging_zip_file)) {
+  download.file(logging_zip_url, logging_zip_file, mode = "wb")
+}
+if (!dir.exists(logging_unzip_dir)) {
+  dir.create(logging_unzip_dir)
+}
+
+unzip(logging_zip_file, exdir = logging_unzip_dir)
+
+# Get the .shp file path 
+logging_shp_file <- list.files(logging_unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
+
+#CA Wildfire dataset
+# Define the download URL
+url <- "https://www.kaggle.com/api/v1/datasets/download/ananthu017/california-wildfire-incidents-20132020?datasetVersionNumber=1"
+
+# Set the destination file
+destfile <- "wildfire_data.zip"
+
+# Perform the download
+GET(url, write_disk(destfile, overwrite = TRUE))
+
+# Unzip the file
+unzip(destfile, exdir = "wildfire_data")
+
+# List the files in the extracted folder
+list.files("wildfire_data")
+
+```
 **Description / Background:**
 
 Wildfires are a natural and essential part of many Californian ecosystems, playing a key role in maintaining balance by supporting new growth and recycling nutrients. However, their continuous impact on human infrastructure, communities, and threats to the ecosystem can be devastating. For our project, we want to explore the connections between wildfires and logging within California’s national forests.
@@ -117,22 +161,28 @@ ggplot(logging_summ, aes(x = reorder(ADMIN_FO_1, n), y = n, fill = ADMIN_FO_1)) 
 ```{r}
 wildfire_polygons <- st_make_valid(wildfire_polygons)
 logging_ca <- st_make_valid(logging_ca)
-overlap_sf <- st_intersection(wildfire_polygons, logging_ca)
+
+fire_sf_clean <- st_make_valid(fire_sf)
+logging_sf_clean <- st_make_valid(logging_sf)
+
+overlap_sf <- st_join(fire_sf_clean, logging_sf_clean, left = FALSE, join = st_intersects)
 ```
 
 ## Plot Overlap Between Wildfire and Logging
 ```{r}
 library(sf)
-#Figure 4
+# Figure 4: Overlap of Wildfire and Logging Activity in California
 ggplot() + 
   geom_sf(data = n_cali, fill = "lightgray", color = "black", alpha = 0.5) +
-  geom_sf(data = wildfire_polygons, aes(fill = "Wildfire"), color = "red", alpha = 0.5) + coord_sf(xlim = c(-124, -114), ylim = c(32, 42))+ 
+  geom_sf(data = wildfire_polygons, aes(fill = "Wildfire"), color = "red", alpha = 0.5) + 
+  coord_sf(xlim = c(-124, -114), ylim = c(32, 42)) + 
   geom_sf(data = logging_ca, aes(fill = "Logging"), color = "blue", alpha = 0.7) +
-  geom_sf(data = overlap_sf, aes(fill = "Overlap"), color = "yellow", alpha = 1) + coord_sf(xlim = c(-124, -114), ylim = c(32, 42))
+  geom_sf(data = overlap_sf, aes(fill = "Overlap"), color = "yellow", alpha = 1) +
   scale_fill_manual(values = c("Wildfire" = "red", "Logging" = "blue", "Overlap" = "yellow")) +
   theme_minimal() +
   labs(title = "Wildfire and Logging Activity Overlap in California (2019)", fill = "Activity Type") +
   theme(legend.position = "right")
+
 ```
 
 Mapping logging regions and wildfire incidents provides a clear way to identify areas with activity, but our goal was to determine whether logging had any impact on wildfire occurrence. To analyze this, we used the merged data set to examine spatial areas that had experienced both logging and wildfires during the same period. Figure 4 presents a visual representation of the overlap between logging/timber harvest activity and wildfire incidents. This overlap is particularly noticeable in Northern California, near the state lines bordering Northwestern Nevada and Southern Oregon. To highlight this, it is marked with a yellow dot.
