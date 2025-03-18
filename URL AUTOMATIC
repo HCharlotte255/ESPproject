@@ -2,6 +2,9 @@
 dataset_url <- "https://example.com/dataset.csv"  # Replace with actual URL
 dataset_path <- "dataset.csv"
 
+https://data.fs.usda.gov/geodata/edw/edw_resources/shp/Actv_TimberHarvest.shp
+
+
 # Check if the dataset exists, if not, download it
 if (!file.exists(dataset_path)) {
   download.file(dataset_url, dataset_path, mode = "wb")
@@ -9,3 +12,33 @@ if (!file.exists(dataset_path)) {
 
 # Load the dataset
 data <- read.csv(dataset_path)
+
+
+
+
+
+
+
+
+```{r setup, include=FALSE}
+library(sf)  # For reading shapefiles
+library(utils)  # For downloading & unzipping
+
+# Define file paths
+zip_url <- "https://example.com/shapefile.zip"  # Replace with actual URL
+zip_file <- "shapefile.zip"
+unzip_dir <- "shapefile_data"
+
+# Check if the folder already exists, if not, download and unzip
+if (!dir.exists(unzip_dir)) {
+  download.file(zip_url, zip_file, mode = "wb")  # Download the ZIP file
+  unzip(zip_file, exdir = unzip_dir)  # Unzip the file
+  unlink(zip_file)  # Optional: Delete ZIP after extracting
+}
+
+# Find the .shp file inside the extracted folder
+shp_file <- list.files(unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
+
+# Load the shapefile
+shape_data <- st_read(shp_file)
+
