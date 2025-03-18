@@ -348,30 +348,41 @@ ggplot(fire_summary, aes(x = reorder(ADMIN_FO_1, -total_fire_size), y = total_fi
 
 ```
 
-3/16, 4:33, bar graph and data summary 
+fixed smooth bar grapgh
 
 
 ```{r}
-logging_sf <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")
-fire_crs <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
+library(dplyr)
+library(sf)
+library(terra)
+library(lubridate)
+library(ggplot2)
+library(stars)
 
-fires_df <- fire_crs  
+
+
+
+
+logging <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")
+ca_wildfire <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
+
+fires_df <- ca_wildfire 
 
 #convert fire data  to spatial object
 fires_sf <- st_as_sf(fires_df, coords = c("Longitude", "Latitude"), crs = 4326)
 
 # Transform the CRS of fire data to match the logging data's CRS
-fires_sf <- st_transform(fires_sf, st_crs(logging_sf))
+fires_sf <- st_transform(fires_sf, st_crs(logging))
 
 # Disable s2 geometry library 
 sf_use_s2(FALSE)
 
 #Filter Logging Areas in National Forests
-loggingca = logging_sf %>%
+loggingca = logging %>%
   filter(grepl("National Forest", ADMIN_FORE, ignore.case = TRUE))
 
 #Remove Empty Geometries
-logging_ca = logging_sf[!st_is_empty(logging_sf), ]
+logging_ca = logging[!st_is_empty(logging_sf), ]
 
 #Find Fire Incidents Inside Logging Areas
 fire_logging_zones = st_intersection(fires_sf, logging_ca)
@@ -409,6 +420,7 @@ ggplot() +
   scale_color_gradient(low = "yellow", high = "red") +
   labs(title = "Wildfire Incidents in Logging Areas",
        color = "Acres Burned")
+
 
 ````
 
