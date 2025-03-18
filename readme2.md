@@ -162,8 +162,7 @@ ggplot(logging_summ, aes(x = reorder(ADMIN_FO_1, n), y = n, fill = ADMIN_FO_1)) 
 wildfire_polygons <- st_make_valid(wildfire_polygons)
 logging_ca <- st_make_valid(logging_ca)
 
-fire_sf_clean <- st_make_valid(fire_sf)
-logging_sf_clean <- st_make_valid(logging_sf)
+
 
 overlap_sf <- st_join(fire_sf_clean, logging_sf_clean, left = FALSE, join = st_intersects)
 ```
