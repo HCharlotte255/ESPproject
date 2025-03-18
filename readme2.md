@@ -1,5 +1,7 @@
 Timber harvest: https://data.fs.usda.gov/geodata/edw/datasets.php?xmlKeyword=harvest
+
 California Data set: https://www.kaggle.com/datasets/ananthu017/california-wildfire-incidents-20132020/data
+
 CA boundary : https://data.ca.gov/dataset/ca-geographic-boundaries 
        
        
