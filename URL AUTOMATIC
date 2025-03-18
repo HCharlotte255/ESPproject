@@ -1,3 +1,31 @@
+
+```{r}
+library(sf)
+library(utils)
+
+
+logging_zip_url <- https://data.fs.usda.gov/geodata/edw/edw_resources/shp/Actv_TimberHarvest.zip
+logging_zip_file<-"Actv_TimberHarvest.zip"
+logging_unzip_dir<- "S_USA.Actv_TimberHarvest.shp"
+
+
+logging_shp_file <- list.files(unzip_dir, pattern = "\\.shp$", full.names = TRUE)[1]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  Set the file name and URL
 dataset_url <- "https://example.com/dataset.csv"  # Replace with actual URL
 dataset_path <- "dataset.csv"
@@ -12,10 +40,6 @@ if (!file.exists(dataset_path)) {
 
 # Load the dataset
 data <- read.csv(dataset_path)
-
-
-
-
 
 
 
