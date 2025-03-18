@@ -1,3 +1,9 @@
+Timber harvest: https://data.fs.usda.gov/geodata/edw/datasets.php?xmlKeyword=harvest
+
+       
+       
+       
+       
        Connection Between Wildfires and Logging Activity in California
 Question: Does logging activity affect wildfire occurrences? 
 Hypothesis: In areas with higher logging activity, the acres burned from wildfires will increase.
