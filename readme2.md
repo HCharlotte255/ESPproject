@@ -103,7 +103,7 @@ While wildfires are natural events, their increasing severity and frequency pose
 It is important to note that logging is not the only factor influencing fire frequency and severity. Other variables, such as vegetation changes and climate change, may have altered environmental conditions, making certain areas more fire-prone. For future research, we aim to incorporate more detailed logging statistics and investigate additional factors that contribute to wildfires, such as vegetation density, climate change, and wind speed.
 
 
-
+```{r}
 
 library(tidyr)
 library(dplyr)
@@ -116,7 +116,7 @@ library(stars)
 
 
 
-```{r}
+
 
 logging_sf <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")  # Replace with actual file path
 fire_crs <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
