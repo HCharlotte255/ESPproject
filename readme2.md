@@ -103,3 +103,65 @@ While wildfires are natural events, their increasing severity and frequency pose
 It is important to note that logging is not the only factor influencing fire frequency and severity. Other variables, such as vegetation changes and climate change, may have altered environmental conditions, making certain areas more fire-prone. For future research, we aim to incorporate more detailed logging statistics and investigate additional factors that contribute to wildfires, such as vegetation density, climate change, and wind speed.
 
 
+
+
+library(tidyr)
+library(dplyr)
+library(sf)
+library(terra)
+library(lubridate)
+library(ggplot2)
+library(stars)
+
+
+
+
+```{r}
+
+logging_sf <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")  # Replace with actual file path
+fire_crs <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
+ca <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/ca_state/CA_State.shp")
+
+
+fire_sf <- st_as_sf(fire_crs, coords = c("Longitude", "Latitude"), crs = 4326)
+
+
+st_crs(fire_sf) <- 4326
+fire_sf <- st_transform(fire_sf, st_crs(ca))
+fire_sf <- st_transform(fire_sf, st_crs(logging_sf))
+
+logging_sf <- st_transform(logging_sf, st_crs(ca))
+fire_sf <- st_transform(fire_crs, st_crs(ca))
+
+
+fire_sf <- st_transform(fire_sf, st_crs(logging_sf))
+
+
+
+
+fire_logging_overlap <- st_join(fire_sf, logging_sf, left = FALSE, join = st_intersects)
+
+-----------------------------------------------
+# correlation plot and results
+correlation_result <- cor(fire_logging_overlap$AcresBurned,fire_logging_overlap$NBR_UNITS_, use = "complete.obs")
+cor.test(fire_logging_overlap$AcresBurned,fire_logging_overlap$NBR_UNITS_, use = "complete.obs")
+
+scatterplot <- ggplot(fire_logging_overlap, aes(x = NBR_UNITS_, y = AcresBurned)) +
+  geom_point(alpha = 0.5) + 
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Correlation Between Logging Intensity and Fire Severity",
+       x = "Logged Acres",
+       y = "Acres Burned") +
+  theme_minimal()
+
+------------------
+#7 of 101 variables, condense  
+  tidy_logging <- fire_logging_overlap %>%
+  group_by(ADMIN_FO_1) %>%  # Replace with the actual column name
+  summarize(across(where(is.numeric), sum, na.rm = TRUE),  # Sum numeric values
+            across(where(is.character), ~paste(unique(.), collapse = ", "), .names = "combined_{.col}")) %>%
+  ungroup()
+
+```
+
+
