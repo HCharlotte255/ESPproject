@@ -138,6 +138,59 @@ ggplot() +
   geom_sf(data = overlap_sf, aes(fill = "Overlap"), color = "yellow", alpha = 1) + 
   scale_fill_manual(values = c("Wildfire" = "red", "Logging" = "blue", "Overlap" = "yellow")) + theme_minimal() + labs(title = "Wildfire and Logging Activity Overlap in California (2019)", fill = "Activity Type") + theme(legend.position = "right") 
 ```
+
+
+correlation plot fixed with tarilyn
+
+```{r}
+
+library(dplyr)
+library(sf)
+library(terra)
+library(lubridate)
+library(ggplot2)
+library(stars)
+
+logging <- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/Actv_TimberHarvest/S_USA.Actv_TimberHarvest.shp")  # Replace with actual file path
+ca_wildfire <- read.csv("C:/Users/candl/OneDrive/Desktop/esp prject/California_Fire_Incidents.csv")
+n_cali<- st_read("C:/Users/candl/OneDrive/Desktop/esp prject/ca_state/CA_State.shp")
+
+
+fire_sf <- st_as_sf(ca_wildfire, coords = c("Longitude", "Latitude"), crs = 4326)
+
+fire_sf <- st_transform(fire_sf, st_crs(n_cali))
+fire_sf <- st_transform(fire_sf, st_crs(logging))
+logging_sf <- st_transform(logging, st_crs(n_cali))
+
+
+fire_logging_overlap <- st_join(fire_sf, logging_sf, left = FALSE, join = st_intersects)
+
+
+
+
+correlation_result <- cor(fire_logging_overlap$AcresBurned,fire_logging_overlap$NBR_UNITS_, use = "complete.obs")
+cor.test(fire_logging_overlap$AcresBurned,fire_logging_overlap$NBR_UNITS_, use = "complete.obs")
+
+scatterplot <- ggplot(fire_logging_overlap, aes(x = NBR_UNITS_, y = AcresBurned)) +
+  geom_point(alpha = 0.5) + 
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Correlation Between Logging Intensity and Fire Severity",
+       x = "Logged Acres",
+       y = "Acres Burned") +
+  theme_minimal()
+
+
+
+```
+
+
+
+
+
+
+
+
+
 Create a bar plot data frame
 ```{r}
 wildfire_sf = st_as_sf(ca_wildfire, coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE)
